@@ -10,7 +10,7 @@ from .transform import rf_tf_v2r, map_tf_repr
 HOST = "http://10.10.10.20:8081"
 
 OBJECT_HEIGHT = 0.03
-Z_ZERO_LVL = 0.124
+Z_ZERO_LVL = 0.2792491  # without handcrafted spatula: 0.124
 Z_SWIPE_LVL = Z_ZERO_LVL + OBJECT_HEIGHT / 2
 Z_PREP_LVL = Z_ZERO_LVL + 0.1
 HOME_TCP_POS = (-0.3, 0, 0.3)
@@ -18,8 +18,13 @@ HOME_TCP_ANGLES = (math.pi, 0, 0)
 
 
 class RozumArm:
-    def __init__(self):
-        self.api = RobotPulse(HOST)
+    def __init__(self, use_mock_api=False):
+        if use_mock_api:
+            api_cls = MockAPI
+        else:
+            api_cls = RobotPulse
+        
+        self.api = api_cls(HOST)
         self.speed = 10.0
 
         self._move_home()
@@ -67,4 +72,20 @@ class RozumArm:
         self._move_tcp(pos=pos_1 + (Z_SWIPE_LVL,), angles=swipe_start_tcp_angles)
         self._move_tcp(pos=pos_2 + (Z_SWIPE_LVL,), angles=swipe_stop_tcp_angles)
         self._move_tcp(pos=pos_2 + (Z_PREP_LVL,), angles=swipe_stop_tcp_angles)
-        self._move_home()
+
+
+class MockAPI:
+    def __init__(self, host):
+        pass
+    
+    def status(self):
+        return {'state': 'ACTIVE'}
+    
+    def get_position(self):
+        return position([0.3, 0., 0], [math.pi, 0, 0])
+    
+    def set_position(self, position, *args, **kwargs):
+        print(f'went through point {position.point} with rot {position.rotation}')
+    
+    def close_gripper(self):
+        pass

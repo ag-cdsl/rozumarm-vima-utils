@@ -18,7 +18,7 @@ class VIMASceneRenderer:
     center of constrained zone at approx (0.45, 0)
     """
 
-    def __init__(self, task_name: str):
+    def __init__(self, task_name: str, hide_arm_rgb=True):
         assert task_name in (
             "sweep_without_exceeding",
             "sweep_without_touching",
@@ -27,7 +27,7 @@ class VIMASceneRenderer:
             task_name=task_name,
             modalities="rgb",
             # display_debug_window=True,
-            # hide_arm_rgb=False
+            hide_arm_rgb=hide_arm_rgb
         )
 
     def reset(self, exact_num_swept_objects: Optional[int] = None):
@@ -56,9 +56,9 @@ class VIMASceneRenderer:
         """
         - assumes arm is hidden
         
-        obj_posquats: iterable of (2d-position, quaternion) tuples in VIMA's reference frame,
+        obj_posquats: iterable of (2d-position, quaternion) tuples,
             swept objects come first, distractors come last
-        from_rozumarm_rf: whether posquats are given in rozum arm rf
+        from_rozumarm_rf: whether posquats are given in rf of rozum-arm or VIMA
         """
         assert len(obj_posquats) == 2 * self.n_swept_objs, "Wrong number of positions."
 
@@ -132,8 +132,6 @@ class VIMASceneRenderer:
         bias = tcp_rot.apply(bias)
         target_pos = [a + b for a, b in zip(tcp_pos, bias)]
 
-        print(target_pos)
-        print(tcp_rot.as_quat())
         joint_angles = pybullet.calculateInverseKinematics(
             bodyUniqueId=UR5_BODY_ID,
             endEffectorLinkIndex=7,  # solving for last link
