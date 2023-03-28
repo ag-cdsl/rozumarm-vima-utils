@@ -1,12 +1,6 @@
 from typing import Callable
-import sys
-import pathlib
 
 import numpy as np
-
-sys.path.append(
-    pathlib.Path(__file__).parents[2].as_posix()
-)
 
 from rozumarm_vima_utils.transform import rf_tf_c2r, map_tf_repr_c2r
 

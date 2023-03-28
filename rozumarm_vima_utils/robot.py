@@ -4,7 +4,7 @@ import math
 from scipy.spatial.transform import Rotation
 from pulseapi import RobotPulse, position, MT_LINEAR
 
-from .transform import rf_tf_v2r, map_tf_repr
+from .transform import rf_tf_v2r, map_tf_repr, map_gripper_rf
 
 
 HOST = "http://10.10.10.20:8081"
@@ -55,7 +55,7 @@ class RozumArm:
         """
         if not from_rozumarm_rf:
             posquat_1, posquat_2 = [
-                (rf_tf_v2r(pos), map_tf_repr(quat))
+                (rf_tf_v2r(pos), map_tf_repr(map_gripper_rf(quat)))
                 for pos, quat in (posquat_1, posquat_2)
             ]
 
@@ -63,8 +63,8 @@ class RozumArm:
         pos_2, quat_2 = posquat_2
         pos_1, pos_2 = tuple(pos_1), tuple(pos_2)
 
-        *_, z_rot_1 = Rotation.from_quat(quat_1).as_euler("xyz")
-        *_, z_rot_2 = Rotation.from_quat(quat_2).as_euler("xyz")
+        *_, z_rot_1 = Rotation.from_quat(quat_1).as_euler("XYZ")
+        *_, z_rot_2 = Rotation.from_quat(quat_2).as_euler("XYZ")
         swipe_start_tcp_angles = (math.pi, 0, z_rot_1)
         swipe_stop_tcp_angles = (math.pi, 0, z_rot_2)
 
@@ -82,7 +82,7 @@ class MockAPI:
         return {'state': 'ACTIVE'}
     
     def get_position(self):
-        return position([0.3, 0., 0], [math.pi, 0, 0])
+        return position([-0.3, 0., 0.2], [math.pi, 0., 0.])
     
     def set_position(self, position, *args, **kwargs):
         print(f'went through point {position.point} with rot {position.rotation}')

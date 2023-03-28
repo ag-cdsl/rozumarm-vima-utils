@@ -125,52 +125,58 @@ class VIMASceneRenderer:
         }
 
     def set_arm_state(self, tcp_pos, tcp_quat):
-        tcp_rot = Rotation.from_quat(tcp_quat)
+        joint_angles = self.env.solve_ik((tcp_pos, tcp_quat))
+        self.env.movej(joint_angles, speed=0.01)
+        
+        # tcp_rot = Rotation.from_quat(tcp_quat)
 
         # shift from body COM
-        bias = [0, -0.09, 0]
-        bias = tcp_rot.apply(bias)
-        target_pos = [a + b for a, b in zip(tcp_pos, bias)]
-
-        joint_angles = pybullet.calculateInverseKinematics(
-            bodyUniqueId=UR5_BODY_ID,
-            endEffectorLinkIndex=7,  # solving for last link
-            targetPosition=target_pos,
-            targetOrientation=tcp_rot.as_quat(),
-            jointDamping=[0.0001] * 6,
-            solver=0,
-            maxNumIterations=100,
-            residualThreshold=0.001
-        )
-
+        # bias = [0, -0.09, 0]
+        # bias = tcp_rot.apply(bias)
+        # target_pos = [a + b for a, b in zip(tcp_pos, bias)]
+        
+        # joint_angles = pybullet.calculateInverseKinematics(
+        #     bodyUniqueId=UR5_BODY_ID,
+        #     endEffectorLinkIndex=7+3,  # solving for last link
+        #     targetPosition=target_pos,
+        #     targetOrientation=tcp_rot.as_quat(),
+        #     lowerLimits=[-3 * np.pi / 2, -2.3562, -17, -17, -17, -17],
+        #     upperLimits=[-np.pi / 2, 0, 17, 17, 17, 17],
+        #     jointRanges=[np.pi, 2.3562, 34, 34, 34, 34],  # * 6,
+        #     restPoses=np.float32(homej).tolist(),
+        #     maxNumIterations=100,
+        #     residualThreshold=1e-5,
+        # )
+        
         # move joints
-        for i, theta in zip(range(2, 7), joint_angles):
-            pybullet.resetJointState(
-                bodyUniqueId=UR5_BODY_ID,
-                jointIndex=i,
-                targetValue=theta,
-                physicsClientId=self.env.client_id
-            )
+        # for i, theta in zip(range(2, 7), joint_angles):
+        #     pybullet.resetJointState(
+        #         bodyUniqueId=UR5_BODY_ID,
+        #         jointIndex=i,
+        #         targetValue=theta,
+        #         physicsClientId=self.env.client_id
+        #     )
         
-        # move eef
-        last_link_state = pybullet.getLinkState(
-            UR5_BODY_ID,
-            7,
-            physicsClientId=self.env.client_id
-        )
-        last_link_pos, last_link_quat, *_ = last_link_state
+        # # move eef
+        # last_link_state = pybullet.getLinkState(
+        #     UR5_BODY_ID,
+        #     7,
+        #     physicsClientId=self.env.client_id
+        # )
+        # last_link_pos, last_link_quat, *_ = last_link_state
 
-        last_link_rot = Rotation.from_quat(last_link_quat)
-        eef_rot_wrt_last_link = Rotation.from_euler('xyz', (-90, 0, 0), degrees=True)
-        tcp_rot = (last_link_rot * eef_rot_wrt_last_link).as_quat()
+        # last_link_rot = Rotation.from_quat(last_link_quat)
+        # # print(last_link_rot.as_euler('XYZ'))
+        # eef_rot_wrt_last_link = Rotation.from_euler('xyz', (0, 0, 0), degrees=True)
+        # tcp_rot = (last_link_rot * eef_rot_wrt_last_link).as_quat()
         
-        bias = [0, 0.07, 0]
-        bias = last_link_rot.apply(bias)
-        eef_pos = [a + b for a, b in zip(last_link_pos, bias)]
+        # bias = [0, 0.07, 0]
+        # bias = last_link_rot.apply(bias)
+        # eef_pos = [a + b for a, b in zip(last_link_pos, bias)]
 
-        pybullet.resetBasePositionAndOrientation(
-            bodyUniqueId=SPATULA_BODY_ID,
-            posObj=eef_pos,
-            ornObj=tcp_rot,
-            physicsClientId=self.env.client_id,
-        )
+        # pybullet.resetBasePositionAndOrientation(
+        #     bodyUniqueId=SPATULA_BODY_ID,
+        #     posObj=eef_pos,
+        #     ornObj=tcp_rot,
+        #     physicsClientId=self.env.client_id,
+        # )

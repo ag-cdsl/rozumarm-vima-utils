@@ -1,18 +1,19 @@
 from typing import Callable
-import sys
-import pathlib
 
 import matplotlib.pyplot as plt
 from scipy.spatial.transform import Rotation
 
-sys.path.append(
-    pathlib.Path(__file__).parents[2].as_posix()
-)
 
 from rozumarm_vima_utils.scene_renderer import VIMASceneRenderer
 from rozumarm_vima_utils.robot import RozumArm
 from rozumarm_vima_utils.scripts.detect_cubes import mock_detect_cubes
-from rozumarm_vima_utils.transform import rf_tf_c2r, map_tf_repr_c2r
+from rozumarm_vima_utils.transform import (
+    rf_tf_c2r,
+    map_tf_repr_c2r,
+    rf_tf_r2v,
+    map_tf_repr,
+    map_gripper_rf
+)
 
 
 def render_real2sim(r: VIMASceneRenderer, robot: RozumArm, cubes_detector: Callable):
@@ -31,10 +32,16 @@ def render_real2sim(r: VIMASceneRenderer, robot: RozumArm, cubes_detector: Calla
     
     # set arm pos
     pos = robot.api.get_position()
-    tcp_pos = [getattr(pos.point, axis) for axis in ('x', 'y', 'z')]
-    tcp_angles = [getattr(pos.rotation, angle_name) for angle_name in ('roll', 'pitch', 'yaw')]
-    tcp_quat = Rotation.from_euler('xyz', tcp_angles).as_quat() 
-    r.set_arm_state(tcp_pos, tcp_quat)
+    rozum_tcp_pos = [getattr(pos.point, axis) for axis in ('x', 'y', 'z')]
+    rozum_tcp_angles = [getattr(pos.rotation, angle_name) for angle_name in ('roll', 'pitch', 'yaw')]
+    rozum_tcp_quat = Rotation.from_euler('XYZ', rozum_tcp_angles).as_quat()
+    
+    # map from rozum to vima
+    vima_tcp_pos = rf_tf_r2v(rozum_tcp_pos, from3d=True)
+    tmp_tcp_quat = map_tf_repr(rozum_tcp_quat)
+    vima_tcp_quat = map_gripper_rf(tmp_tcp_quat)
+    
+    r.set_arm_state(vima_tcp_pos, vima_tcp_quat)
     
     image = r.render_full_view()
     return image

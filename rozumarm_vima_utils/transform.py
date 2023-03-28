@@ -11,11 +11,13 @@ T = Rotation.from_matrix(
 )
 
 
-def rf_tf_r2v(vec):
+def rf_tf_r2v(vec, from3d=False):
     """Rozum arm to Vima env transform
 
     vec: of shape (2,)
     """
+    if from3d:
+        return R2V_TF_SCALE * T.apply(vec)
     return R2V_TF_SCALE * T.apply((*vec, 0))[:2]
 
 
@@ -29,6 +31,23 @@ def rf_tf_v2r(vec):
 
 def map_tf_repr(quat):
     return (Rotation.from_quat(quat) * T).as_quat()
+
+
+GRIPPER_RF_ROT = Rotation.from_matrix(
+        np.array([
+        [-1, 0, 0],
+        [0, 1, 0],
+        [0, 0, -1]
+    ])
+)
+
+def map_gripper_rf(quat):
+    """
+    active
+    involutary
+    """
+    rot = Rotation.from_quat(quat)
+    return (GRIPPER_RF_ROT * rot).as_quat()
 
 
 # Cam-Rozum transforms
