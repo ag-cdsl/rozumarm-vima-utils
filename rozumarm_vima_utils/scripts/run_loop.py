@@ -39,6 +39,10 @@ def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
         pos_1 = clipped_action["pose1_position"]
         eef_quat = robot.get_swipe_quat(pos_0, pos_1)
         
+        x_compensation_bias = 0.05
+        pos_0[0] += x_compensation_bias
+        pos_1[0] += x_compensation_bias
+        
         posquat_0 = (pos_0, eef_quat)
         posquat_1 = (pos_1, eef_quat)
         robot.swipe(posquat_0, posquat_1)

@@ -3,6 +3,7 @@ from scipy.spatial.transform import Rotation
 
 # Rozum-Vima transforms
 R2V_TF_SCALE = 1.0
+R2V_CUSTOM_BIAS = 0.3
 
 T = Rotation.from_matrix(
     np.array([[-1, 0, 0],
@@ -17,8 +18,13 @@ def rf_tf_r2v(vec, from3d=False):
     vec: of shape (2,)
     """
     if from3d:
-        return R2V_TF_SCALE * T.apply(vec)
-    return R2V_TF_SCALE * T.apply((*vec, 0))[:2]
+        res = T.apply(vec)
+    else:
+        res = T.apply((*vec, 0))[:2]
+    
+    res *= R2V_TF_SCALE
+    res[0] += R2V_CUSTOM_BIAS
+    return res
 
 
 def rf_tf_v2r(vec):
@@ -26,6 +32,7 @@ def rf_tf_v2r(vec):
 
     vec: of shape (2,)
     """
+    vec[0] -= R2V_CUSTOM_BIAS
     return 1 / R2V_TF_SCALE * T.apply((*vec, 0))[:2]
 
 
