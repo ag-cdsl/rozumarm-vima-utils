@@ -38,7 +38,17 @@ def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
 
         posquat_1 = (clipped_action["pose0_position"], clipped_action["pose0_rotation"])
         posquat_2 = (clipped_action["pose1_position"], clipped_action["pose1_rotation"])
-        robot.swipe(posquat_1, posquat_2)
+
+        new_pos_1 = posquat_1[0]
+        new_pos_2 = posquat_2[0]
+
+        new_pos_1[0] += 0.05
+        new_pos_2[0] += 0.05
+
+        new_posquat_1 = (new_pos_1, posquat_1[1])
+        new_posquat_2 = (new_pos_2, posquat_2[1])
+
+        robot.swipe(new_posquat_1, new_posquat_2)
 
 
 def main():

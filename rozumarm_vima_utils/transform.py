@@ -17,8 +17,12 @@ def rf_tf_r2v(vec, from3d=False):
     vec: of shape (2,)
     """
     if from3d:
-        return R2V_TF_SCALE * T.apply(vec)
-    return R2V_TF_SCALE * T.apply((*vec, 0))[:2]
+        res = R2V_TF_SCALE * T.apply(vec)
+        res[0] += 0.3
+        return res
+    res = R2V_TF_SCALE * T.apply((*vec, 0))[:2]
+    res[0] += 0.3
+    return res
 
 
 def rf_tf_v2r(vec):
@@ -26,6 +30,7 @@ def rf_tf_v2r(vec):
 
     vec: of shape (2,)
     """
+    vec[0] -= 0.3
     return 1 / R2V_TF_SCALE * T.apply((*vec, 0))[:2]
 
 
