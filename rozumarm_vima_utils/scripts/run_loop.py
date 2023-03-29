@@ -4,7 +4,6 @@ import numpy as np
 
 from rozumarm_vima_utils.transform import rf_tf_c2r, map_tf_repr_c2r
 
-
 def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
     """
     r: scene renderer
@@ -36,9 +35,13 @@ def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
             for k, v in action.items()
         }
 
-        posquat_1 = (clipped_action["pose0_position"], clipped_action["pose0_rotation"])
-        posquat_2 = (clipped_action["pose1_position"], clipped_action["pose1_rotation"])
-        robot.swipe(posquat_1, posquat_2)
+        pos_0 = clipped_action["pose0_position"]
+        pos_1 = clipped_action["pose1_position"]
+        eef_quat = robot.get_swipe_quat(pos_0, pos_1)
+        
+        posquat_0 = (pos_0, eef_quat)
+        posquat_1 = (pos_1, eef_quat)
+        robot.swipe(posquat_0, posquat_1)
 
 
 def main():

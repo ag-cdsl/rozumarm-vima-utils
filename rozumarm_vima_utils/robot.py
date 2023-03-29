@@ -1,6 +1,7 @@
 import time
 import math
 
+import numpy as np
 from scipy.spatial.transform import Rotation
 from pulseapi import RobotPulse, position, MT_LINEAR
 
@@ -72,6 +73,19 @@ class RozumArm:
         self._move_tcp(pos=pos_1 + (Z_SWIPE_LVL,), angles=swipe_start_tcp_angles)
         self._move_tcp(pos=pos_2 + (Z_SWIPE_LVL,), angles=swipe_stop_tcp_angles)
         self._move_tcp(pos=pos_2 + (Z_PREP_LVL,), angles=swipe_stop_tcp_angles)
+
+    @staticmethod
+    def get_swipe_quat(pos_1, pos_2):
+        """
+        quat is in VIMA-rf
+        """
+        pos_1 = np.asarray(pos_1)
+        pos_2 = np.asarray(pos_2)
+        
+        dir_vec = pos_2 - pos_1
+        theta = np.arctan2(dir_vec[1], dir_vec[0])
+        quat = Rotation.from_euler('XYZ', (0, 0, theta)).as_quat()
+        return quat
 
 
 class MockAPI:
