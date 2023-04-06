@@ -40,6 +40,7 @@ def map_tf_repr(quat):
     return (Rotation.from_quat(quat) * T).as_quat()
 
 
+# rotates (0, pi, 0)
 GRIPPER_RF_ROT = Rotation.from_matrix(
         np.array([
         [-1, 0, 0],
@@ -54,7 +55,7 @@ def map_gripper_rf(quat):
     involutary
     """
     rot = Rotation.from_quat(quat)
-    return (GRIPPER_RF_ROT * rot).as_quat()
+    return (rot * GRIPPER_RF_ROT).as_quat()  # compose intrinsically
 
 
 # Cam-Rozum transforms

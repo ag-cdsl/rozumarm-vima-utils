@@ -56,7 +56,7 @@ class RozumArm:
         """
         if not from_rozumarm_rf:
             posquat_1, posquat_2 = [
-                (rf_tf_v2r(pos), map_tf_repr(map_gripper_rf(quat)))
+                (rf_tf_v2r(pos), map_gripper_rf(map_tf_repr(quat)))
                 for pos, quat in (posquat_1, posquat_2)
             ]
 
@@ -78,6 +78,7 @@ class RozumArm:
     @staticmethod
     def get_swipe_quat(pos_1, pos_2):
         """
+        positions are in VIMA-rf
         quat is in VIMA-rf
         """
         pos_1 = np.asarray(pos_1)
@@ -97,7 +98,7 @@ class MockAPI:
         return {'state': 'ACTIVE'}
     
     def get_position(self):
-        return position([-0.3, 0., 0.2], [math.pi, 0., 0.])
+        return position([-0.3, 0., 0.2], [math.pi, 0., -math.pi / 4])
     
     def set_position(self, position, *args, **kwargs):
         print(f'went through point {position.point} with rot {position.rotation}')
