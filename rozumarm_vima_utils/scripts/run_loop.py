@@ -4,12 +4,12 @@ import numpy as np
 
 from rozumarm_vima_utils.transform import rf_tf_c2r, map_tf_repr_c2r
 
-def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
+def run_loop(r, robot, oracle, cubes_detector, n_iters=3):
     """
     r: scene renderer
     """
     for _ in range(n_iters):
-        obj_posquats = cubes_detector()
+        obj_posquats = cubes_detector.detect()
 
         # map from cam to rozum
         obj_posquats = [
@@ -28,6 +28,7 @@ def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
         action = oracle.act(obs)
         if action is None:
             print("ORACLE FAILED.")
+            # cubes_detector.release()
             return
 
         clipped_action = {
@@ -39,7 +40,7 @@ def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
         pos_1 = clipped_action["pose1_position"]
         eef_quat = robot.get_swipe_quat(pos_0, pos_1)
         
-        x_compensation_bias = 0.05
+        x_compensation_bias = 0.03
         pos_0[0] += x_compensation_bias
         pos_1[0] += x_compensation_bias
         
@@ -48,18 +49,39 @@ def run_loop(r, robot, oracle, cubes_detector: Callable, n_iters=3):
         robot.swipe(posquat_0, posquat_1)
 
 
+from rozumarm_vima_utils.scene_renderer import VIMASceneRenderer
 def main():
-    from rozumarm_vima_utils.scene_renderer import VIMASceneRenderer
     from rozumarm_vima_utils.robot import RozumArm
     from rozumarm_vima_utils.scripts.detect_cubes import mock_detect_cubes
+    # from rozumarm_vima_utils.cv.test import CubeDetector
 
     r = VIMASceneRenderer('sweep_without_exceeding')
     oracle = r.env.task.oracle(r.env)
-    robot = RozumArm(use_mock_api=True)
+    robot = RozumArm(use_mock_api=False)
     
     r.reset(exact_num_swept_objects=1)
     
-    run_loop(r, robot, oracle, cubes_detector=mock_detect_cubes, n_iters=5)
+    from rozumarm_vima_utils.cv.test import detector
+    run_loop(r, robot, oracle, cubes_detector=detector, n_iters=5)
+
+
+from rozumarm_vima_utils.rozum_env import RozumEnv
+def main_from_env():
+    rozum_env = RozumEnv()
+
+    obs = rozum_env.reset()
+    for i in range(5):
+        oracle = rozum_env.renderer.env.task.oracle(rozum_env.renderer.env)
+        action = oracle.act(obs)
+        if action is None:
+            print("ORACLE FAILED.")
+            return
+
+        clipped_action = {
+            k: np.clip(v, rozum_env.renderer.env.action_space[k].low, rozum_env.renderer.env.action_space[k].high)
+            for k, v in action.items()
+        }
+        obs = rozum_env.step(clipped_action)
 
 
 if __name__ == '__main__':

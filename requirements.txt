@@ -1,4 +1,4 @@
 -e git+https://github.com/vimalabs/VIMABench.git@8b0de79#egg=vima_bench
 scipy==1.10.1
 ipykernel
-pulse-api==1.8.4
+pulse-api==1.6.0
