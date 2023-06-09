@@ -25,8 +25,8 @@ class VIMASceneRenderer:
         ), "Non constraint-satisfaction tasks are not supported."
         self.env = make(
             task_name=task_name,
-            modalities="rgb",
-            # display_debug_window=True,
+            # modalities="rgb",
+            display_debug_window=True,
             hide_arm_rgb=hide_arm_rgb
         )
 

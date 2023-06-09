@@ -5,8 +5,9 @@ import cv2
 def toTuple(a, b):
     return [((*ai,), (*bi,)) for ai, bi in zip(a, b) ]
 
-from detect_boxes import detect_boxes
-from calibrate_table import calibrate_table
+from detect_boxes import detect_boxes, detect_boxes_segm, detect_boxes_visual
+from calibrate_table import calibrate_table_by_aruco, calibrate_table_by_markers
+from params import table_aruco_size, box_aruco_size, box_size, K, D, target_table_markers
 
 
 
@@ -18,25 +19,23 @@ from calibrate_table import calibrate_table
 #         start_t = time.time()
 #         while time.time() - start_t < 5:
 #             _, image = cam.update() 
-#         calibrate_matrix = calibrate_table(image, K, D)
+#         calibrate_matrix = calibrate_table_by_aruco(image, K, D)
 #     boxes_positions, boxes_orientations = detect_boxes(image, K, D, calibrate_matrix)
 #     return toTuple(boxes_positions, boxes_orientations)
 
 class CubeDetector():
     def __init__(self) -> None:
         self.cam = Camera(2, (1280, 1024))
-        self.cam_calibration = np.load('/home/daniil/Загрузки/rozumarm-vima-utils/rozumarm_vima_utils/scripts/calib.npz')
-        self.K = self.cam_calibration['K']
-        self.D = self.cam_calibration['D']
         ret, image = self.cam.update()
-        self.calibrate_matrix, _ = calibrate_table(image, self.K, self.D, 0.132)
+        self.table_frame, _ = calibrate_table_by_aruco(image, "top", K, D, table_aruco_size)
 
     
     def detect(self):
         ret, image = self.cam.update()
-        # print(image.shape)
-        # cv2.imwrite('./test.jpg', image)
-        boxes_positions, boxes_orientations = detect_boxes(image, self.K, self.D, self.calibrate_matrix, 0.0172, 0.03)
+        print(image.shape)
+        cv2.imwrite('./test.jpg', image)
+        boxes_positions, boxes_orientations = detect_boxes(image, "top", K, D, self.table_frame, box_aruco_size, box_size)
+        print(f"Detected {len(boxes_positions)} boxes")
         res = toTuple( boxes_positions, boxes_orientations)
         for i, j in enumerate(res):
             print(f'cube #{i}: {j}')
@@ -46,25 +45,24 @@ class CubeDetector():
 import time
 class CubeDenseDetector():
     def __init__(self) -> None:
-        self.cam_1 = CamDenseReader(2, 'cam_1_video.mp4')
-        self.cam_2 = CamDenseReader(4, 'cam_2_video.mp4')
+        self.cam_1 = CamDenseReader(2, 'cam_top_video.mp4')
+        self.cam_2 = CamDenseReader(0, 'cam_front_video.mp4')
         self.cam_1.start_recording()
         self.cam_2.start_recording()
 
-        self.cam_calibration = np.load('/home/daniil/Загрузки/rozumarm-vima-utils/rozumarm_vima_utils/scripts/calib.npz')
-        self.K = self.cam_calibration['K']
-        self.D = self.cam_calibration['D']
         ret, image = self.cam_1.read_image()
-        self.calibrate_matrix, _ = calibrate_table(image, self.K, self.D, 0.132)
+        self.table_frame, _ = calibrate_table_by_aruco(image, "top", K, D, table_aruco_size)
+        # self.table_transform = calibrate_table_by_markers(image, "top", K, D, target_table_markers)
         time.sleep(3)
-        
 
-    
     def detect(self):
         ret, image = self.cam_1.read_image()
-        # print(image.shape)
-        # cv2.imwrite('./test.jpg', image)
-        boxes_positions, boxes_orientations = detect_boxes(image, self.K, self.D, self.calibrate_matrix, 0.0172, 0.03)
+        print(image.shape)
+        cv2.imwrite('./test.jpg', image)
+        # boxes_positions, boxes_orientations = detect_boxes(image, "top", K, D, self.table_frame, box_aruco_size, box_size)
+        boxes_positions, boxes_orientations = detect_boxes_segm(image, "top", K, D, self.table_frame, box_size)
+        # boxes_positions, boxes_orientations = detect_boxes_visual(image, "top", K, D, self.table_transform)
+        print(f"Detected {len(boxes_positions)} boxes")
         res = toTuple( boxes_positions, boxes_orientations)
         for i, j in enumerate(res):
             print(f'cube #{i}: {j}')
@@ -75,6 +73,6 @@ class CubeDenseDetector():
         self.cam_2.stop_recording()
 
 
-detector = CubeDetector()
-# detector = CubeDenseDetector()
+# detector = CubeDetector()
+detector = CubeDenseDetector()
 
