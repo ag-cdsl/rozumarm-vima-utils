@@ -19,6 +19,10 @@ ROZUM_FRAME_POINTS_FILEPATH = "assets/marker_points_in_rozum_rf_v2_synth.npy"
 # TABLE_FRAME_POINTS_FILEPATH = os.path.expanduser("~/test.npy")
 # ROZUM_FRAME_POINTS_FILEPATH = "assets/marker_points_in_rozum_rf_v2_synth.npy"
 
+# v5 (top camera, mean from 5 images at the same camera position)
+# TABLE_FRAME_POINTS_FILEPATH = \
+#     "assets/aruco_corners_in_table_mean_5.npy"
+# ROZUM_FRAME_POINTS_FILEPATH = "assets/marker_points_in_rozum_rf_v2_synth.npy"
 
 def find_rot():
     key_points_crf = np.load(TABLE_FRAME_POINTS_FILEPATH)
