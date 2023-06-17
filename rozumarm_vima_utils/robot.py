@@ -1,5 +1,6 @@
 import time
 import math
+from types import SimpleNamespace
 
 import numpy as np
 from scipy.spatial.transform import Rotation
@@ -134,13 +135,21 @@ class MockAPI:
         pass
     
     def status(self):
-        return {'state': 'ACTIVE'}
+        return SimpleNamespace(state="ACTIVE")
     
     def get_position(self):
         return position([-0.3, 0., 0.2], [math.pi, 0., -math.pi / 4])
     
+    def _get_triplet_repr(self, triplet):
+        return '({})'.format(', '.join([f'{x:.3f}' for x in triplet]))
+        
     def set_position(self, position, *args, **kwargs):
-        print(f'went through point {position.point} with rot {position.rotation}')
+        coords = [getattr(position.point, attr_name) for attr_name in ('x', 'y', 'z')]
+        angles = [getattr(position.rotation, attr_name) for attr_name in ('pitch', 'roll', 'yaw')]
+        
+        coords_repr = self._get_triplet_repr(coords)
+        angles_repr = self._get_triplet_repr(angles)
+        print(f'went through point xyz: {coords_repr} with rot pry: {angles_repr}')
     
     def open_gripper(self):
         pass

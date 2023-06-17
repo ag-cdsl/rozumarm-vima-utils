@@ -26,7 +26,7 @@ class VIMASceneRenderer:
         self.env = make(
             task_name=task_name,
             # modalities="rgb",
-            display_debug_window=True,
+            display_debug_window=False,
             hide_arm_rgb=hide_arm_rgb
         )
 
