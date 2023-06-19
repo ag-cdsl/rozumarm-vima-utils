@@ -45,26 +45,27 @@ def find_rot():
     return rot, rssd
     
 
-def get_new_rot():
-    rot, rssd = find_rot()
-    angles = rot.as_euler('XYZ', degrees=True)
-    print(f'New rot XYZ angles: {angles}')
-    print(f'rssd: {rssd}')
-
-
 def main():
     """
-    use determined bias value only after setting scale
+    Prints determined instrument bias and transform parameters.
     """
     key_points_crf = np.load(TABLE_FRAME_POINTS_FILEPATH)
     key_points_crf = key_points_crf[:, :2]
     key_points_rrf = np.load(ROZUM_FRAME_POINTS_FILEPATH)
 
-    # determine scale
-    pdist_crf = scipy.spatial.distance.pdist(key_points_crf)
-    pdist_rrf = scipy.spatial.distance.pdist(key_points_rrf)
-    scale = (pdist_rrf / pdist_crf).mean()
-    print(f'scale: {scale}')
+    # determine if there is bias in measurements
+    pdist_crf = scipy.spatial.distance.pdist(key_points_crf, metric='euclidean')
+    pdist_rrf = scipy.spatial.distance.pdist(key_points_rrf, metric='euclidean')
+
+    pdist_err = pdist_crf - pdist_rrf
+    dist_rmse = np.sqrt(np.mean(pdist_err ** 2))
+    scale_std = (pdist_rrf / pdist_crf).std()
+    pdist_err_max = np.abs(pdist_err).max()
+    print("\n[BIAS DETECTION]",
+        f"RMSE of pairwise distances = {dist_rmse * 1e3:.1f} mm.",
+        f"Max distance discrepancy = {pdist_err_max * 1e3:.1f} mm.",
+        f"Std of scale = {scale_std * 1e3:.1f} mm.",
+        sep="\n")
     
     # determine CAM -> ROZUM bias
     key_points_crf_rot_to_r = np.vstack([
@@ -75,10 +76,24 @@ def main():
     rf_offsets = key_points_rrf - key_points_crf_rot_to_r
     avg_offset = rf_offsets.mean(axis=0)
     offset_std = rf_offsets.std(axis=0)
-    print(f'\nrf offsets:\n{rf_offsets}')
-    print(f'\nmean: {avg_offset}\nstd: {offset_std}')
+    
+    rot, rssd = find_rot()
+    angles = rot.as_euler('XYZ', degrees=True)
+    
+    with np.printoptions(precision=2, suppress=True):
+        print("\n[TF PARAMS]",
+            f"Translation (cm): {avg_offset * 1e2}",
+            f"Translation estimate std (mm): {offset_std * 1e3}",
+            f"Rotation XYZ angles (degrees): {angles}",
+            f"RSSD for rotation = {rssd * 1e3:.1f} mm.",
+            sep="\n")
+        print()
+    
+    with np.printoptions(suppress=True):
+        print('--- RAW ---')
+        print(f"translation: {avg_offset}")
+        print(f"rotation: {angles}")
 
 
 if __name__ == '__main__':
     main()
-    # get_new_rot()

@@ -74,15 +74,26 @@ def map_gripper_rf(quat):
 
 # --- v4: corrected rrf dataset --- (working!)
 
-C2R_TF_SCALE = 0.98478
+# C2R_TF_SCALE = 0.98478
+# C2R_T = Rotation.from_euler('XYZ',
+#     [ 0.,  0., 90.5767351],
+#     degrees=True
+# ).inv()
+# R2C_T = C2R_T.inv()
+# C2R_B = np.array([-0.35048685, 0.00094445], dtype=np.float64)  # points from R to B, described in R
+
+
+# --- v5: removed scale correction
+
+C2R_TF_SCALE = 1.0
 C2R_T = Rotation.from_euler('XYZ',
     [ 0.,  0., 90.5767351],
     degrees=True
 ).inv()
 R2C_T = C2R_T.inv()
-C2R_B = np.array([-0.35048685, 0.00094445], dtype=np.float64)  # points from R to B, described in R
+C2R_B = np.array([-0.3514728, -0.00007647], dtype=np.float64)  # points from R to B, described in R
 
-# --- v5: tmp test ---
+# --- v5.1: tmp test ---
 
 # C2R_TF_SCALE = 1.0
 # C2R_T = Rotation.from_euler('XYZ',
