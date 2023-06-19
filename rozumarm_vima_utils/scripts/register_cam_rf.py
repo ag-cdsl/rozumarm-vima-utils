@@ -48,6 +48,8 @@ def find_rot():
 def main():
     """
     Prints determined instrument bias and transform parameters.
+    
+    use estimated rotation to compute translation (run 2 times!)
     """
     key_points_crf = np.load(TABLE_FRAME_POINTS_FILEPATH)
     key_points_crf = key_points_crf[:, :2]
