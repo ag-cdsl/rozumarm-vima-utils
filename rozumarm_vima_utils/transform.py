@@ -104,9 +104,9 @@ C2R_B = np.array([-0.3514728, -0.00007647], dtype=np.float64)  # points from R t
 # C2R_B = np.array([-3.51584573e-01,  1.74344281e-06], dtype=np.float64)  # points from R to B, described in R
 
 
-def rf_tf_c2r(vec, apply_bias=True):
+def rf_tf_c2r(vec, apply_translation=True):
     v = C2R_TF_SCALE * C2R_T.apply((*vec, 0))[:2]
-    if apply_bias:
+    if apply_translation:
         v += C2R_B
     return v
 

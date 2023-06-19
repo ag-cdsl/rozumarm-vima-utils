@@ -67,9 +67,9 @@ def main():
         f"Std of scale = {scale_std * 1e3:.1f} mm.",
         sep="\n")
     
-    # determine CAM -> ROZUM bias
+    # determine CAM -> ROZUM translation
     key_points_crf_rot_to_r = np.vstack([
-    rf_tf_c2r(key_points_crf[i], apply_bias=False)
+    rf_tf_c2r(key_points_crf[i], apply_translation=False)
         for i in range(4)
     ])
 
