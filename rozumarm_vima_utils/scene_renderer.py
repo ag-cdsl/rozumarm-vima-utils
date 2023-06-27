@@ -60,7 +60,10 @@ class VIMASceneRenderer:
             swept objects come first, distractors come last
         from_rozumarm_rf: whether posquats are given in rf of rozum-arm or VIMA
         """
-        assert len(obj_posquats) == 2 * self.n_swept_objs, "Wrong number of positions."
+        n_expected_objects = 2 * self.n_swept_objs
+        n_received_objects = len(obj_posquats)
+        assert (n_received_objects == n_expected_objects,
+                f"Wrong number of positions. Expected {n_expected_objects}, got {n_received_objects}.")
 
         # map to rf
         if from_rozumarm_rf:

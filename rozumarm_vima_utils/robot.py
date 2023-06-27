@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import numpy as np
 from scipy.spatial.transform import Rotation
 from pulseapi import RobotPulse, position, MT_LINEAR, pose
+from pdhttp.rest import ApiException
 
 from .transform import rf_tf_v2r, map_tf_repr, map_gripper_rf
 
@@ -30,7 +31,7 @@ class RozumArm:
             api_cls = RobotPulse
         
         self.api = api_cls(HOST)
-        self.speed = 20.0
+        self.speed = 35.0
 
         self._move_home()
         # self.api.open_gripper()
@@ -103,16 +104,18 @@ class RozumArm:
         # self._wait()
 
         # print(f'starting swipe at {pos_1}')  # hw failure here
-        self._move_tcp(pos=pos_1 + (Z_PREP_LVL,), angles=swipe_start_tcp_angles)
-        self._move_tcp(pos=pos_1 + (Z_SWIPE_LVL,), angles=swipe_start_tcp_angles)
-        self._move_tcp(pos=pos_2 + (Z_SWIPE_LVL,), angles=swipe_stop_tcp_angles)
-        self._move_tcp(pos=pos_2 + (Z_PREP_LVL,), angles=swipe_stop_tcp_angles)
-
+        try:
+            self._move_tcp(pos=pos_1 + (Z_PREP_LVL,), angles=swipe_start_tcp_angles)
+            self._move_tcp(pos=pos_1 + (Z_SWIPE_LVL,), angles=swipe_start_tcp_angles)
+            self._move_tcp(pos=pos_2 + (Z_SWIPE_LVL,), angles=swipe_stop_tcp_angles)
+            self._move_tcp(pos=pos_2 + (Z_PREP_LVL,), angles=swipe_stop_tcp_angles)
+            self._move_home()
+        except ApiException as e:
+            print("Rozum API request failed.")
+            print(e)
         # print('moving to PREP_HOME_POSE after swipe...')
         # self.api.set_pose(pose(HOME_POSE), speed=self.speed)  # hw failure here
         # self._wait()
-
-        self._move_home()
 
     @staticmethod
     def get_swipe_quat(pos_1, pos_2):

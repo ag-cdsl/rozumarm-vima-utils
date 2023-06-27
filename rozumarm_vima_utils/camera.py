@@ -98,7 +98,7 @@ def dense_reader_thread(device_id, buf: list, is_reading: threading.Event, readi
     writer = cv2.VideoWriter(
         output_filename,
         cv2.VideoWriter_fourcc(*'mp4v'),
-        fps=10,
+        fps=30,
         frameSize=(1280, 1024)
     )
 
