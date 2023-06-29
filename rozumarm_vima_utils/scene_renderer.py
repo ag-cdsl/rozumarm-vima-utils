@@ -62,8 +62,8 @@ class VIMASceneRenderer:
         """
         n_expected_objects = 2 * self.n_swept_objs
         n_received_objects = len(obj_posquats)
-        assert (n_received_objects == n_expected_objects,
-                f"Wrong number of positions. Expected {n_expected_objects}, got {n_received_objects}.")
+        assert n_received_objects == n_expected_objects, (
+               f"Wrong number of positions. Expected {n_expected_objects}, got {n_received_objects}.")
 
         # map to rf
         if from_rozumarm_rf:
