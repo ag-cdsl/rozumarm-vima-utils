@@ -25,6 +25,10 @@ class VIMASceneRenderer:
         ), "Non constraint-satisfaction tasks are not supported."
         self.env = make(
             task_name=task_name,
+            task_kwargs={
+                "possible_dragged_obj_texture": ["red", "blue"],
+                "possible_base_obj_texture": ["yellow", "purple"]
+            },
             # modalities="rgb",
             display_debug_window=False,
             hide_arm_rgb=hide_arm_rgb
