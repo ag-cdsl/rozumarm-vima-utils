@@ -151,6 +151,11 @@ class VIMASceneRenderer:
             i: float(i == n) for i in range(1, n + 1)
         }
 
+        # tweak prompt generation
+        from vima_bench.tasks.task_suite.constraint_satisfaction.base import det_to_integer
+        det_to_integer.clear()
+        det_to_integer["all"] = n
+
     def set_arm_state(self, tcp_pos, tcp_quat):
         joint_angles = self.env.solve_ik((tcp_pos, tcp_quat))
         self.env.movej(joint_angles, speed=0.01)
