@@ -18,17 +18,14 @@ class VIMASceneRenderer:
     center of constrained zone at approx (0.45, 0)
     """
 
-    def __init__(self, task_name: str, hide_arm_rgb=True):
+    def __init__(self, task_name: str, hide_arm_rgb=True, task_kwargs=None):
         assert task_name in (
             "sweep_without_exceeding",
             "sweep_without_touching",
         ), "Non constraint-satisfaction tasks are not supported."
         self.env = make(
             task_name=task_name,
-            task_kwargs={
-                "possible_dragged_obj_texture": ["red", "blue"],
-                "possible_base_obj_texture": ["yellow", "purple"]
-            },
+            task_kwargs=task_kwargs,
             # modalities="rgb",
             display_debug_window=False,
             hide_arm_rgb=hide_arm_rgb
