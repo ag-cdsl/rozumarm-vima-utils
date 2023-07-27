@@ -31,13 +31,19 @@ class VIMASceneRenderer:
             hide_arm_rgb=hide_arm_rgb
         )
 
-    def reset(self, exact_num_swept_objects: Optional[int] = None):
+    def reset(
+        self,
+        exact_num_swept_objects: Optional[int] = None,
+        force_textures=False):
         """
         exact_num_swept_objects: the exact number of swept objects to use
         """
         if exact_num_swept_objects is not None:
             self._set_exact_num_swept_objs(exact_num_swept_objects)
 
+        if force_textures:
+            self._force_deterministic_textures(self.env.task)
+            
         self.env.reset()
 
         self.swept_obj_ids = [x[0][0][0] for x in self.env.task.goals]
@@ -53,6 +59,23 @@ class VIMASceneRenderer:
             )
             self.zs.append(z)
 
+    def _force_deterministic_textures(self, task):
+        n_textures = 2
+        attr_name = "force_deterministic_texture_generation"
+        textures = task.possible_dragged_obj_texture
+        
+        assert len(textures) == n_textures
+
+        def fget(self):
+            if hasattr(self, attr_name):
+                delattr(self, attr_name)
+                return [textures[0]] * n_textures
+            else:
+                return textures
+        
+        type(task).possible_dragged_obj_texture = property(fget)
+        setattr(task, attr_name, True)
+    
     def render_scene(self, obj_posquats, from_rozumarm_rf: bool = True):
         """
         - assumes arm is hidden
