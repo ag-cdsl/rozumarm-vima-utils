@@ -105,11 +105,26 @@ class RozumArm:
 
         # print(f'starting swipe at {pos_1}')  # hw failure here
         try:
-            self._move_tcp(pos=pos_1 + (Z_PREP_LVL,), angles=swipe_start_tcp_angles)
-            self._move_tcp(pos=pos_1 + (Z_SWIPE_LVL,), angles=swipe_start_tcp_angles)
-            self._move_tcp(pos=pos_2 + (Z_SWIPE_LVL,), angles=swipe_stop_tcp_angles)
-            self._move_tcp(pos=pos_2 + (Z_PREP_LVL,), angles=swipe_stop_tcp_angles)
-            self._move_home()
+            # self._move_tcp(pos=pos_1 + (Z_PREP_LVL,), angles=swipe_start_tcp_angles)
+            # self._move_tcp(pos=pos_1 + (Z_SWIPE_LVL,), angles=swipe_start_tcp_angles)
+            # self._move_tcp(pos=pos_2 + (Z_SWIPE_LVL,), angles=swipe_stop_tcp_angles)
+            # self._move_tcp(pos=pos_2 + (Z_PREP_LVL,), angles=swipe_stop_tcp_angles)
+            # self._move_home()
+
+            positions = [
+                position(pos_1 + (Z_PREP_LVL,), swipe_start_tcp_angles),
+                position(pos_1 + (Z_SWIPE_LVL,), swipe_start_tcp_angles),
+                position(pos_2 + (Z_SWIPE_LVL,), swipe_stop_tcp_angles),
+                position(pos_2 + (Z_PREP_LVL,), swipe_stop_tcp_angles),
+                position(HOME_TCP_POS, HOME_TCP_ANGLES)
+            ]
+            self.api.run_positions(
+                positions,
+                self.speed,
+                motion_type=MT_LINEAR
+            )
+            self._wait()
+            
         except ApiException as e:
             print("Rozum API request failed.")
             print(e)
