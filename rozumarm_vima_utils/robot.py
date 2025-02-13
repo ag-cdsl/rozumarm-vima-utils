@@ -31,9 +31,9 @@ class RozumArm:
             api_cls = RobotPulse
         
         self.api = api_cls(HOST)
-        self.speed = 35.0
+        self.speed = 15.0
 
-        self.move_home()
+        # self.move_home()
         # self.api.open_gripper()
 
     def _wait(self):

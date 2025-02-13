@@ -5,27 +5,42 @@ Useful files:
 2) rozumarm-vima-utils/rozumarm_vima_utils/notebooks/itest_robot.ipynb
 """
 
+import time
 
-import numpy as np
+from scipy.spatial.transform import Rotation as R
+
 from rozumarm_vima_utils.robot import RozumArm
 
 
 POINTS = [
-    ((0., 0.3, 0.6), (np.pi, 0, 0)),
-    ((0., 0.3, 0.6), (np.pi, 0, 0)),
-    ((0., 0.3, 0.6), (np.pi, 0, 0)),
+    # center
+    (
+        [-0.1955730723827631, -0.11038192678679404, 0.6906691404152611],
+        [-3.0869227407263193, -1.240679527697654, -3.0425004166458525]
+    ),
+    # left
+    (
+        [-0.1955730723827631, -0.25, 0.65],
+        [-3.1, -1.2, -3.0425004166458525]
+    ),
+    # right
+    (
+        [-0.4177575034681805, 0.2402043210249394, 0.4167568825958069],
+        [2.5661427730657667, -0.8154069583456097, 2.3613085549435513]
+    ),
 ]
 
 
 def main():
-    robot = RozumArm(use_mock_api=True)
+    robot = RozumArm(use_mock_api=False)
     
     point_idx = 0
     while True:
-        pos, angles = POINTS[point_idx]
-        
-        robot.move_tcp(pos, angles)
-        
+        pos, angles_rad_to_api = POINTS[point_idx]
+
+        robot.move_tcp(pos, angles_rad_to_api)
+        time.sleep(1)
+
         point_idx = (point_idx + 1) % len(POINTS)
 
 
