@@ -33,7 +33,7 @@ class RozumArm:
         self.api = api_cls(HOST)
         self.speed = 35.0
 
-        self._move_home()
+        self.move_home()
         # self.api.open_gripper()
 
     def _wait(self):
@@ -42,7 +42,7 @@ class RozumArm:
         # self.api.status()["state"] != "ACTIVE":  # for pulse-api 1.8.4
             time.sleep(0.1)
 
-    def _move_tcp(self, pos, angles):
+    def move_tcp(self, pos, angles):
         self.api.set_position(
             position(pos, angles),
             self.speed,
@@ -50,8 +50,8 @@ class RozumArm:
         )
         self._wait()
 
-    def _move_home(self):
-        self._move_tcp(HOME_TCP_POS, HOME_TCP_ANGLES)
+    def move_home(self):
+        self.move_tcp(HOME_TCP_POS, HOME_TCP_ANGLES)
         # self.api.set_pose(pose(HOME_CAMERA_SAFE_POSE), speed=self.speed)
         # self._wait()
 
