@@ -113,3 +113,31 @@ def rf_tf_c2r(vec, apply_translation=True):
 
 def map_tf_repr_c2r(quat):
     return (Rotation.from_quat(quat) * R2C_T).as_quat()
+
+
+import numpy as np
+from scipy.spatial.transform import Rotation
+
+def make_transform_matrix(p, q):
+    """Makes 4D transform matrix from tranlation vector and quaternion.
+    
+    returns: np.array (4, 4)
+    """
+    rotation_matrix = Rotation.from_quat(q).as_matrix()
+    res = np.vstack((np.hstack((rotation_matrix, p[:, None])), [0, 0, 0, 1]))
+    return res
+
+
+def get_transform_between_frames(p1, q1, p2, q2):
+    """Computes transform between RF described by (p1, a1) and another described by (p2, q2)
+    
+    returns: 4D matrix
+    
+    t1 describes 0 -> 1
+    t2 describes 0 -> 2
+    1 -> 2 is described by t1.inv() * t2
+    """
+    tf_01 = make_transform_matrix(p1, q1)
+    tf_02 = make_transform_matrix(p2, q2)
+    tf_12 = np.linalg.inv(tf_01) @ tf_02
+    return tf_12
